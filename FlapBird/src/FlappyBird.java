@@ -52,7 +52,7 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
 
     // LOGICA DO JOGO
     Bird bird;
-    int VelocityX = -4; 
+    int VelocityX = -4;
     int VelocityY = 0;
     int gravity = 1;
 
@@ -61,9 +61,11 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     Timer placePipesTimer;
     boolean gameOver = false;
 
+    double counter = 0;
+
     FlappyBird() {
         setPreferredSize(new Dimension(LarguraBorda, AlturaBorda));
-        
+
         // Configurações de Teclado
         setFocusable(true);
         addKeyListener(this);
@@ -71,7 +73,8 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
         // Inicializar a lista de canos
         pipes = new ArrayList<Pipe>();
 
-        // Carregamento das imagens (Certifique-se que os arquivos estão na pasta correta)
+        // Carregamento das imagens (Certifique-se que os arquivos estão na pasta
+        // correta)
         backgroundImage = new ImageIcon(getClass().getResource("./flappybirdbg.png")).getImage();
         birdImage = new ImageIcon(getClass().getResource("./flappybird.png")).getImage();
         topPipeImage = new ImageIcon(getClass().getResource("./toppipe.png")).getImage();
@@ -118,6 +121,11 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
             Pipe pipe = pipes.get(i);
             pipe.x += VelocityX;
 
+            if (!pipe.Passed && bird.x > pipe.x + pipe.width) {
+                pipe.Passed = true;
+                counter += 0.5;
+            }
+
             if (collision(bird, pipe)) {
                 gameOver = true;
             }
@@ -131,9 +139,9 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
 
     public boolean collision(Bird a, Pipe b) {
         return a.x < b.x + b.width &&
-               a.x + a.width > b.x &&
-               a.y < b.y + b.height &&
-               a.y + a.height > b.y;
+                a.x + a.width > b.x &&
+                a.y < b.y + b.height &&
+                a.y + a.height > b.y;
     }
 
     @Override
@@ -155,11 +163,15 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
             g.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height, null);
         }
 
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("Pontuação: " + (int) counter, 10, 20);
+
         // Texto de Game Over
         if (gameOver) {
             g.setColor(Color.RED);
             g.setFont(new Font("Arial", Font.BOLD, 32));
-            g.drawString("GAME OVER", LarguraBorda/4, AlturaBorda/2);
+            g.drawString("GAME OVER", LarguraBorda / 4, AlturaBorda / 2);
         }
     }
 
@@ -179,22 +191,28 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
             VelocityY = -9; // Pulo
 
             if (gameOver) {
-                // Reiniciar o jogo
                 bird.y = birdY;
-                VelocityY = 0;
+                bird.x = birdX;
+                bird.y = birdY; // Note que esta linha aparece repetida na imagem
                 pipes.clear();
+                counter = 0;
                 gameOver = false;
-                gameLoop.start();
                 placePipesTimer.start();
+                gameLoop.start();
             }
         }
     }
 
     // Métodos obrigatórios do KeyListener
-    @Override public void keyTyped(KeyEvent e) {}
-    @Override public void keyReleased(KeyEvent e) {}
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
 
-// ... final do código anterior (métodos do teclado) ...
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
+
+    // ... final do código anterior (métodos do teclado) ...
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Flappy Bird");
